@@ -10,6 +10,10 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
+        $defaultUserProfileInfo = 'Standardni korisnik Credentify aplikacije. Prati svoje kredencijale i veštine.';
+        $adminProfileInfo = 'Administrator sistema. Upravlja korisnicima, izdavačima i definicijama kredencijala.';
+        $moderatorProfileInfo = 'Moderator sistema. Pregleda prijave za kredencijale i donosi odluke (odobri/odbij).';
+
         // Admin
         User::updateOrCreate(
             ['email' => 'admin@credentify.test'],
@@ -17,7 +21,7 @@ class UserSeeder extends Seeder
                 'name' => 'Admin',
                 'password' => Hash::make('password'),
                 'role' => User::ROLE_ADMIN,
-                'profile_info' => null,
+                'profile_info' => $adminProfileInfo,
             ]
         );
 
@@ -28,27 +32,29 @@ class UserSeeder extends Seeder
                 'name' => 'Lazar',
                 'password' => Hash::make('password'),
                 'role' => User::ROLE_MODERATOR,
-                'profile_info' => null,
+                'profile_info' => $moderatorProfileInfo,
             ]
         );
 
+        // Nikola - user
         User::updateOrCreate(
             ['email' => 'nikola@credentify.test'],
             [
                 'name' => 'Nikola',
                 'password' => Hash::make('password'),
                 'role' => User::ROLE_USER,
-                'profile_info' => null,
+                'profile_info' => $defaultUserProfileInfo,
             ]
         );
 
+        // Igor - user
         User::updateOrCreate(
             ['email' => 'igor@credentify.test'],
             [
                 'name' => 'Igor',
                 'password' => Hash::make('password'),
                 'role' => User::ROLE_USER,
-                'profile_info' => null,
+                'profile_info' => $defaultUserProfileInfo,
             ]
         );
 
@@ -66,7 +72,7 @@ class UserSeeder extends Seeder
                     'name' => $u['name'],
                     'password' => Hash::make('password'),
                     'role' => User::ROLE_USER,
-                    'profile_info' => null,
+                    'profile_info' => $defaultUserProfileInfo,
                 ]
             );
         }
