@@ -18,7 +18,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropIndex(['role']);
             $table->dropColumn(['profile_info', 'role']);
         });
     }
