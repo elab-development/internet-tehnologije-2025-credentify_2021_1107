@@ -16,7 +16,11 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-        IssuerSeeder::class,
-    ]);
+            UserSeeder::class,           // admin, moderator, users
+            IssuerSeeder::class,         // 10 issuers
+            SkillSeeder::class,          // 10 skills
+            CredentialSeeder::class,     // credentials + povezivanje na issuers + pivot credential_skill
+            UserCredentialSeeder::class, // user_credentials (samo role=user) + datumi + image
+        ]);
     }
 }
