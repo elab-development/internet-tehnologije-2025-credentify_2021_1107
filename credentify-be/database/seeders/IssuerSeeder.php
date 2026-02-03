@@ -30,7 +30,7 @@ class IssuerSeeder extends Seeder
 
             if (!$response->successful()) {
                 // Ako želiš da vidiš grešku:
-                // $this->command?->warn('ROR request failed: ' . $response->status());
+                 $this->command?->warn('ROR request failed: ' . $response->status());
                 continue;
             }
 
@@ -98,13 +98,11 @@ class IssuerSeeder extends Seeder
 
                 if ($issuer->wasRecentlyCreated) {
                     $inserted++;
-                    // $this->command?->info("Created issuer: {$name}");
                 }
 
                 if ($inserted >= 10) break 2;
             }
         }
 
-        // $this->command?->info("Total created: {$inserted}");
     }
 }
