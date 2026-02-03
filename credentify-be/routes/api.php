@@ -37,5 +37,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //klasican logovani korisnik rute
     Route::get('/me/credentials', [UserCredentialController::class, 'myCredentials']);
-    
+    Route::get('/me', [UserController::class, 'me']);
+    Route::put('/me/profile-info', [UserController::class, 'updateProfileInfo']);
+    Route::get('/me/available-credentials', [UserController::class, 'availableCredentials']);
+    Route::post('/me/apply', [UserController::class, 'applyForCredential']);
+
 });
