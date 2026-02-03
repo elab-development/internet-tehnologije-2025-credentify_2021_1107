@@ -33,7 +33,7 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $request->string('name'),
             'email' => $request->string('email'),
-            'password' => Hash::make($request->string('password')),
+            'password' => $request->string('password'),
             'role' => User::ROLE_USER,
             'profile_info' => 'Standardni korisnik Credentify aplikacije. Prati svoje kredencijale i veštine.',
         ]);

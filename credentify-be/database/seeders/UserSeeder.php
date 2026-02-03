@@ -19,7 +19,7 @@ class UserSeeder extends Seeder
             ['email' => 'admin@credentify.test'],
             [
                 'name' => 'Admin',
-                'password' => Hash::make('password'),
+                'password' => 'password',
                 'role' => User::ROLE_ADMIN,
                 'profile_info' => $adminProfileInfo,
             ]
@@ -30,7 +30,7 @@ class UserSeeder extends Seeder
             ['email' => 'lazar@credentify.test'],
             [
                 'name' => 'Lazar',
-                'password' => Hash::make('password'),
+                'password' => 'password',
                 'role' => User::ROLE_MODERATOR,
                 'profile_info' => $moderatorProfileInfo,
             ]
@@ -41,7 +41,7 @@ class UserSeeder extends Seeder
             ['email' => 'nikola@credentify.test'],
             [
                 'name' => 'Nikola',
-                'password' => Hash::make('password'),
+                'password' => 'password',
                 'role' => User::ROLE_USER,
                 'profile_info' => $defaultUserProfileInfo,
             ]
@@ -52,7 +52,7 @@ class UserSeeder extends Seeder
             ['email' => 'igor@credentify.test'],
             [
                 'name' => 'Igor',
-                'password' => Hash::make('password'),
+                'password' => 'password',
                 'role' => User::ROLE_USER,
                 'profile_info' => $defaultUserProfileInfo,
             ]
@@ -70,7 +70,7 @@ class UserSeeder extends Seeder
                 ['email' => $u['email']],
                 [
                     'name' => $u['name'],
-                    'password' => Hash::make('password'),
+                    'password' => 'password',
                     'role' => User::ROLE_USER,
                     'profile_info' => $defaultUserProfileInfo,
                 ]
