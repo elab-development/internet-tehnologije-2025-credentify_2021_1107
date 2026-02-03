@@ -9,7 +9,7 @@ export default function Card({ title, subtitle, actions, children, footer }) {
       {hasHeader && (
         <div className="card-header">
           <div>
-            {title && <h2 className="h2">{title}.</h2>}
+            {title && <h2 className="h2">{title}</h2>}
             {subtitle && <p className="p">{subtitle}</p>}
           </div>
 

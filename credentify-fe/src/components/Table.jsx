@@ -10,9 +10,9 @@ export default function Table({ columns, rows, rowKey = "id", actions }) {
         <thead>
           <tr>
             {columns.map((c) => (
-              <th key={c.key}>{c.header}.</th>
+              <th key={c.key}>{c.header}</th>
             ))}
-            {actions && actions.length > 0 && <th>Akcije.</th>}
+            {actions && actions.length > 0 && <th>Akcije</th>}
           </tr>
         </thead>
 
