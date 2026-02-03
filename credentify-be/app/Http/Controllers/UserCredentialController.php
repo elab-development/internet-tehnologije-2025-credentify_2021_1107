@@ -168,7 +168,7 @@ class UserCredentialController extends Controller
             ], 422);
         }
 
-        $newStatus = $request->string('status');
+        $newStatus = $request->input('status');
 
         if ($newStatus === 'Approved') {
             $issued = Carbon::today();
