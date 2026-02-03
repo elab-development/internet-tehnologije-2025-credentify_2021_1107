@@ -131,7 +131,7 @@ button, input, select, textarea { font: inherit; }
 .container {
   display: grid;
   gap: var(--space-5);
-  width: 1500px;
+  width: 1200px;
   padding: 10px;
 }
 
