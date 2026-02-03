@@ -1,0 +1,465 @@
+/* =========================================================
+   Credentify UI v1.0
+   Paleta: Monochrome Beach.
+   Cilj: čisto, jednostavno, bez gradijenata, uniformno.
+   ========================================================= */
+
+/* 1) CSS varijable. */
+:root {
+  --c-graphite: #353535;
+  --c-stormy-teal: #3c6e71;
+  --c-white: #ffffff;
+  --c-dust-grey: #d9d9d9;
+  --c-yale-blue: #284b63;
+
+  /* Dodatne “basic” boje za status i UI. */
+  --c-bg: #ffffff;
+  --c-surface: #ffffff;
+  --c-border: #d9d9d9;
+  --c-text: #353535;
+  --c-muted: #6b7280;          /* neutralna siva za sekundarni tekst. */
+  --c-success: #2f855a;        /* suptilno zeleno. */
+  --c-danger: #c53030;         /* suptilno crveno. */
+  --c-warning: #b7791f;        /* suptilno narandžasto. */
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0 8px 24px rgba(0,0,0,0.08);
+
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+
+  --space-1: 6px;
+  --space-2: 10px;
+  --space-3: 14px;
+  --space-4: 18px;
+  --space-5: 40px;
+
+  --ring: 0 0 0 3px rgba(60, 110, 113, 0.22);
+
+  /* Font: čist, moderan, bez “AI” vajba. */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+/* 2) Reset + osnovno. */
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--c-bg);
+  color: var(--c-text);
+}
+
+a { color: inherit; text-decoration: none; }
+button, input, select, textarea { font: inherit; }
+
+/* 3) Layout. */
+.app {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  background: var(--c-bg);
+}
+
+.sidebar {
+  border-right: 1px solid var(--c-border);
+  padding: var(--space-5);
+  background: var(--c-surface);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: var(--space-5);
+}
+
+.brand-badge {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--c-yale-blue);
+  box-shadow: var(--shadow-sm);
+}
+
+.brand-title {
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+.nav {
+  display: grid;
+  gap: 8px;
+}
+
+.nav-item {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  color: var(--c-text);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.nav-item:hover {
+  background: rgba(217, 217, 217, 0.35);
+}
+
+.nav-item.is-active {
+  background: rgba(60, 110, 113, 0.12);
+  border-color: rgba(60, 110, 113, 0.30);
+  color: var(--c-yale-blue);
+  font-weight: 600;
+}
+
+.main {
+  padding: var(--space-5);
+  max-width: 1120px;
+  width: 100%;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.container {
+  display: grid;
+  gap: var(--space-5);
+  width: 1500px;
+  padding: 10px;
+}
+
+/* 4) Tipografija. */
+.h1 {
+  margin: 0;
+  font-size: 40px;
+  line-height: 1.2;
+  letter-spacing: -0.2px;
+}
+
+.h2 {
+  margin: 0;
+  font-size: 35px;
+  line-height: 1.25;
+}
+
+.h3 {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.3;
+}
+
+.p {
+  margin: 0;
+  color: var(--c-muted);
+  line-height: 1.55;
+}
+
+/* 5) Card. */
+.card {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  padding: 20px;
+}
+
+.card-header {
+  padding: var(--space-4) var(--space-4) var(--space-3);
+  border-bottom: 1px solid rgba(217, 217, 217, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.card-content {
+  padding: var(--space-4);
+}
+
+.card-footer {
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid rgba(217, 217, 217, 0.6);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+/* 6) Button (jedan sistem). */
+.btn {
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+  box-shadow: none;
+  transition: transform 0.02s ease, background 0.15s ease, border-color 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.btn:active { transform: translateY(1px); }
+.btn:focus { outline: none; box-shadow: var(--ring); }
+
+.btn-primary {
+  background: var(--c-stormy-teal);
+  color: var(--c-white);
+}
+
+.btn-primary:hover {
+  background: rgba(60, 110, 113, 0.92);
+}
+
+.btn-secondary {
+  background: rgba(217, 217, 217, 0.35);
+  color: var(--c-text);
+  border-color: rgba(217, 217, 217, 0.9);
+}
+
+.btn-secondary:hover {
+  background: rgba(217, 217, 217, 0.55);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--c-yale-blue);
+  border-color: rgba(40, 75, 99, 0.25);
+}
+
+.btn-ghost:hover {
+  background: rgba(40, 75, 99, 0.08);
+}
+
+.btn-danger {
+  background: rgba(197, 48, 48, 0.10);
+  color: var(--c-danger);
+  border-color: rgba(197, 48, 48, 0.22);
+}
+
+.btn-danger:hover {
+  background: rgba(197, 48, 48, 0.16);
+}
+
+/* 7) Forme. */
+.form {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+.label {
+  font-size: 18px;
+  color: var(--c-yale-blue);
+  font-weight: 700;
+}
+
+.input, .select, .textarea {
+  width: 100%;
+  border: 1px solid var(--c-border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: var(--c-white);
+  color: var(--c-text);
+}
+
+.textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.input:focus, .select:focus, .textarea:focus {
+  outline: none;
+  box-shadow: var(--ring);
+  border-color: rgba(60, 110, 113, 0.45);
+}
+
+.helper {
+  font-size: 18px;
+  color: var(--c-muted);
+}
+
+/* 8) Search. */
+.search {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.search-input {
+  min-width: 260px;
+}
+
+/* 9) Badge / Status. */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+
+.badge-success {
+  background: rgba(47, 133, 90, 0.10);
+  color: var(--c-success);
+  border-color: rgba(47, 133, 90, 0.22);
+}
+
+.badge-warning {
+  background: rgba(183, 121, 31, 0.10);
+  color: var(--c-warning);
+  border-color: rgba(183, 121, 31, 0.22);
+}
+
+.badge-danger {
+  background: rgba(197, 48, 48, 0.10);
+  color: var(--c-danger);
+  border-color: rgba(197, 48, 48, 0.22);
+}
+
+.badge-neutral {
+  background: rgba(217, 217, 217, 0.45);
+  color: var(--c-graphite);
+  border-color: rgba(217, 217, 217, 0.95);
+}
+
+/* 10) Table. */
+.table-wrap {
+  overflow: auto;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--c-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--c-white);
+}
+
+.table th, .table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(217, 217, 217, 0.7);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.table th {
+  font-size: 18px;
+  color: var(--c-yale-blue);
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+  background: rgba(217, 217, 217, 0.25);
+}
+
+.table tr:hover td {
+  background: rgba(60, 110, 113, 0.05);
+}
+
+/* 11) Credential cards grid. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+@media (max-width: 980px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { border-right: none; border-bottom: 1px solid var(--c-border); }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+  .grid { grid-template-columns: 1fr; }
+  .search-input { min-width: 0; width: 100%; }
+}
+
+/* 12) Credential card specifics. */
+.credential-card {
+  display: grid;
+  gap: 20px;
+}
+
+.credential-title {
+  font-weight: 800;
+  color: var(--c-graphite);
+}
+
+.credential-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.tag {
+  padding: 10px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(40, 75, 99, 0.20);
+  background: rgba(40, 75, 99, 0.06);
+  color: var(--c-yale-blue);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* 13) Profile block. */
+.profile {
+  display: grid;
+  grid-template-columns: 84px 1fr;
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.avatar {
+  width: 84px;
+  height: 84px;
+  border-radius: 18px;
+  background: rgba(40, 75, 99, 0.10);
+  border: 1px solid rgba(40, 75, 99, 0.20);
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  color: var(--c-yale-blue);
+}
+
+.kv {
+  display: grid;
+  gap: 6px;
+}
+
+.kv-row {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.kv-key {
+  font-size: 20px;
+  color: var(--c-muted);
+  width: 86px;
+}
+
+.kv-val {
+  font-size: 20px;
+  color: var(--c-graphite);
+  font-weight: 700;
+}
