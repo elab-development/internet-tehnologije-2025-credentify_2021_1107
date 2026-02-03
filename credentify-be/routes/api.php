@@ -29,7 +29,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/credentials/{id}', [CredentialController::class, 'show']);
     Route::post('/credentials', [CredentialController::class, 'store']);
     Route::put('/credentials/{id}', [CredentialController::class, 'update']);
-    Route::get('/me/credentials', [UserCredentialController::class, 'myCredentials']);
 
     Route::get('/moderator/user-credentials', [UserCredentialController::class, 'index']);
     Route::get('/moderator/users/{id}/credentials', [UserCredentialController::class, 'userCredentials']);
