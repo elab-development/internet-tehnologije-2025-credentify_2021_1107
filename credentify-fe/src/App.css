@@ -101,6 +101,7 @@ button, input, select, textarea { font: inherit; }
   background: transparent;
   text-align: left;
   cursor: pointer;
+  font-size: 22px;
 }
 
 .nav-item:hover {
@@ -462,4 +463,13 @@ button, input, select, textarea { font: inherit; }
   font-size: 20px;
   color: var(--c-graphite);
   font-weight: 700;
+}
+
+.brand-logo {
+  width: 200px;
+  height: 150px;
+  border-radius: 10px;
+  object-fit: cover;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid rgba(217,217,217,0.8);
 }
