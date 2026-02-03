@@ -1,40 +1,10 @@
 import React, { useMemo, useState } from "react";
 import "./App.css";
 
-function Button({ variant = "primary", children, ...props }) {
-  const cls = `btn ${
-    variant === "primary"
-      ? "btn-primary"
-      : variant === "secondary"
-      ? "btn-secondary"
-      : variant === "danger"
-      ? "btn-danger"
-      : "btn-ghost"
-  }`;
-  return (
-    <button className={cls} {...props}>
-      {children}
-    </button>
-  );
-}
-
-function Card({ title, subtitle, actions, children, footer }) {
-  return (
-    <div className="card">
-      {(title || subtitle || actions) && (
-        <div className="card-header">
-          <div>
-            {title && <h2 className="h2">{title}</h2>}
-            {subtitle && <p className="p">{subtitle}</p>}
-          </div>
-          {actions && <div style={{ display: "flex", gap: 10 }}>{actions}</div>}
-        </div>
-      )}
-      <div className="card-content">{children}</div>
-      {footer && <div className="card-footer">{footer}</div>}
-    </div>
-  );
-}
+import Button from "./components/Button";
+import Card from "./components/Card";
+import Table from "./components/Table";
+import Form from "./components/Form";
 
 function Badge({ tone = "neutral", children }) {
   const cls =
@@ -46,48 +16,6 @@ function Badge({ tone = "neutral", children }) {
       ? "badge badge-danger"
       : "badge badge-neutral";
   return <span className={cls}>{children}</span>;
-}
-
-function ProfileCard({ user, onSave }) {
-  const [profileInfo, setProfileInfo] = useState(user.profile_info);
-
-  return (
-    <Card
-      title="Moj profil"
-      subtitle="Uredi samo profile info, ostalo je read-only."
-      actions={<Badge tone="neutral">{user.role}</Badge>}
-      footer={
-        <Button variant="primary" onClick={() => onSave(profileInfo)}>
-          Sačuvaj
-        </Button>
-      }
-    >
-      <div className="profile">
-        <div className="avatar">{user.name.slice(0, 1).toUpperCase()}</div>
-        <div className="kv">
-          <div className="kv-row">
-            <div className="kv-key">Ime.</div>
-            <div className="kv-val">{user.name}.</div>
-          </div>
-          <div className="kv-row">
-            <div className="kv-key">Email.</div>
-            <div className="kv-val">{user.email}.</div>
-          </div>
-
-          <div className="field" style={{ marginTop: 8 }}>
-            <div className="label">Profile info.</div>
-            <textarea
-              className="textarea"
-              value={profileInfo || ""}
-              onChange={(e) => setProfileInfo(e.target.value)}
-              placeholder="Unesi kratak opis profila."
-            />
-            <div className="helper">Preporuka: do 2–3 rečenice.</div>
-          </div>
-        </div>
-      </div>
-    </Card>
-  );
 }
 
 function CredentialCard({ credential, onApply }) {
@@ -111,53 +39,14 @@ function CredentialCard({ credential, onApply }) {
         </div>
 
         <div style={{ display: "flex", gap: 10, marginTop: 6 }}>
-          <Button variant="primary" onClick={() => onApply(credential.id)}>
+          <Button variant="primary" type="button" onClick={() => onApply(credential.id)}>
             Prijavi se
           </Button>
-          <Button variant="ghost">Detalji</Button>
+          <Button variant="ghost" type="button">
+            Detalji
+          </Button>
         </div>
       </div>
-    </div>
-  );
-}
-
-function SimpleTable({ rows }) {
-  return (
-    <div className="table-wrap">
-      <table className="table">
-        <thead>
-          <tr>
-            <th>Kredencijal.</th>
-            <th>Status.</th>
-            <th>Issued.</th>
-            <th>Expiry.</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={r.id}>
-              <td style={{ fontWeight: 700, color: "#353535" }}>{r.credential}.</td>
-              <td>
-                <Badge
-                  tone={
-                    r.status === "Approved"
-                      ? "success"
-                      : r.status === "Pending"
-                      ? "warning"
-                      : r.status === "Rejected"
-                      ? "danger"
-                      : "neutral"
-                  }
-                >
-                  {r.status}
-                </Badge>
-              </td>
-              <td>{r.issued || "-"}</td>
-              <td>{r.expiry || "-"}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
     </div>
   );
 }
@@ -166,12 +55,15 @@ export default function App() {
   const [page, setPage] = useState("dashboard");
   const [search, setSearch] = useState("");
 
+  const [profileInfo, setProfileInfo] = useState(
+    "Standardni korisnik Credentify aplikacije. Prati svoje kredencijale i veštine."
+  );
+
   const user = useMemo(
     () => ({
       name: "Nikola",
       email: "nikola@credentify.test",
       role: "user",
-      profile_info: "Standardni korisnik Credentify aplikacije. Prati svoje kredencijale i veštine.",
     }),
     []
   );
@@ -208,8 +100,20 @@ export default function App() {
 
   const myRows = useMemo(
     () => [
-      { id: 11, credential: "Backend Development (Laravel) Certificate", status: "Pending", issued: null, expiry: null },
-      { id: 12, credential: "SQL & Relational Databases Certificate", status: "Approved", issued: "2026-01-12", expiry: "2029-01-12" },
+      {
+        id: 11,
+        credential: "Backend Development (Laravel) Certificate",
+        status: "Pending",
+        issued: null,
+        expiry: null,
+      },
+      {
+        id: 12,
+        credential: "SQL & Relational Databases Certificate",
+        status: "Approved",
+        issued: "2026-01-12",
+        expiry: "2029-01-12",
+      },
     ],
     []
   );
@@ -217,16 +121,53 @@ export default function App() {
   const filteredCredentials = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return credentials;
-    return credentials.filter((c) => c.name.toLowerCase().includes(q) || c.category.toLowerCase().includes(q) || c.issuer.toLowerCase().includes(q));
+    return credentials.filter(
+      (c) =>
+        c.name.toLowerCase().includes(q) ||
+        c.category.toLowerCase().includes(q) ||
+        c.issuer.toLowerCase().includes(q)
+    );
   }, [credentials, search]);
 
   function onApply(id) {
     alert(`Prijava poslata za credential_id=${id}.`);
   }
 
-  function onSaveProfile(profileInfo) {
+  function onSaveProfile() {
     alert(`Profile info sačuvan: ${profileInfo}`);
   }
+
+  const myCredentialsColumns = useMemo(
+    () => [
+      {
+        key: "credential",
+        header: "Kredencijal",
+        render: (row) => <span style={{ fontWeight: 700 }}>{row.credential}.</span>,
+      },
+      {
+        key: "status",
+        header: "Status",
+        render: (row) => (
+          <Badge
+            tone={
+              row.status === "Approved"
+                ? "success"
+                : row.status === "Pending"
+                ? "warning"
+                : row.status === "Rejected"
+                ? "danger"
+                : "neutral"
+            }
+          >
+            {row.status}
+          </Badge>
+        ),
+      },
+      { key: "issued", header: "Issued", render: (row) => (row.issued ? row.issued : "-") },
+      { key: "expiry", header: "Expiry", render: (row) => (row.expiry ? row.expiry : "-") },
+    ],
+    []
+  );
 
   return (
     <div className="app">
@@ -237,16 +178,28 @@ export default function App() {
         </div>
 
         <div className="nav">
-          <button className={`nav-item ${page === "dashboard" ? "is-active" : ""}`} onClick={() => setPage("dashboard")}>
+          <button
+            className={`nav-item ${page === "dashboard" ? "is-active" : ""}`}
+            onClick={() => setPage("dashboard")}
+          >
             Dashboard.
           </button>
-          <button className={`nav-item ${page === "available" ? "is-active" : ""}`} onClick={() => setPage("available")}>
+          <button
+            className={`nav-item ${page === "available" ? "is-active" : ""}`}
+            onClick={() => setPage("available")}
+          >
             Dostupni kredencijali.
           </button>
-          <button className={`nav-item ${page === "my" ? "is-active" : ""}`} onClick={() => setPage("my")}>
+          <button
+            className={`nav-item ${page === "my" ? "is-active" : ""}`}
+            onClick={() => setPage("my")}
+          >
             Moji kredencijali.
           </button>
-          <button className={`nav-item ${page === "profile" ? "is-active" : ""}`} onClick={() => setPage("profile")}>
+          <button
+            className={`nav-item ${page === "profile" ? "is-active" : ""}`}
+            onClick={() => setPage("profile")}
+          >
             Moj profil.
           </button>
         </div>
@@ -264,12 +217,18 @@ export default function App() {
                 ? "Moji kredencijali."
                 : "Moj profil."}
             </h1>
-            <p className="p">Uniformni UI: isti button, card, tabela i forma na svakoj stranici.</p>
+            <p className="p">
+              UI koristi samo: Card, Table, Form i Button. Klase su iste svuda.
+            </p>
           </div>
 
           <div style={{ display: "flex", gap: 10 }}>
-            <Button variant="secondary">Help</Button>
-            <Button variant="ghost">Logout</Button>
+            <Button variant="secondary" type="button">
+              Help
+            </Button>
+            <Button variant="ghost" type="button">
+              Logout
+            </Button>
           </div>
         </div>
 
@@ -278,25 +237,30 @@ export default function App() {
             <>
               <Card
                 title="Brzi pregled"
-                subtitle="Primer kartice, badge-ova i akcija."
+                subtitle="Primer kartice i akcija."
                 actions={<Badge tone="success">Active</Badge>}
-                footer={<Button variant="primary" onClick={() => setPage("available")}>Pregledaj kredencijale</Button>}
+                footer={
+                  <Button variant="primary" type="button" onClick={() => setPage("available")}>
+                    Pregledaj kredencijale
+                  </Button>
+                }
               >
                 <p className="p">
-                  Ovaj layout koristi iste klase za kartice, dugmad, tipografiju i spacing. Nema gradijenata i nema “AI” stila.
+                  Ovo je demo layout. Kasnije ćemo zameniti dummy podatke API pozivima, ali UI
+                  struktura ostaje ista.
                 </p>
               </Card>
 
-              <Card title="Moji kredencijali" subtitle="Tabela koristi iste klase globalno.">
-                <SimpleTable rows={myRows} />
+              <Card title="Moji kredencijali" subtitle="Tabela koristi isti stil globalno.">
+                <Table columns={myCredentialsColumns} rows={myRows} rowKey="id" />
               </Card>
             </>
           )}
 
           {page === "available" && (
             <Card
-              title="Prijavi se na kredencijal"
-              subtitle="Pretraga + kartice. Jedan sistem klasa."
+              title="Prijava za kredencijal"
+              subtitle="Pretraga + kartice."
               actions={
                 <div className="search">
                   <input
@@ -305,7 +269,7 @@ export default function App() {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
-                  <Button variant="secondary" onClick={() => setSearch("")}>
+                  <Button variant="secondary" type="button" onClick={() => setSearch("")}>
                     Reset
                   </Button>
                 </div>
@@ -320,12 +284,58 @@ export default function App() {
           )}
 
           {page === "my" && (
-            <Card title="Lista mojih kredencijala" subtitle="Isti table stil svuda.">
-              <SimpleTable rows={myRows} />
+            <Card title="Lista mojih kredencijala" subtitle="Isti Table stil na svim stranicama.">
+              <Table columns={myCredentialsColumns} rows={myRows} rowKey="id" />
             </Card>
           )}
 
-          {page === "profile" && <ProfileCard user={user} onSave={onSaveProfile} />}
+          {page === "profile" && (
+            <Card
+              title="Moj profil"
+              subtitle="Ažurira se samo profile info."
+              actions={<Badge tone="neutral">{user.role}</Badge>}
+            >
+              <div className="profile">
+                <div className="avatar">{user.name.slice(0, 1).toUpperCase()}</div>
+
+                <div className="kv">
+                  <div className="kv-row">
+                    <div className="kv-key">Ime.</div>
+                    <div className="kv-val">{user.name}.</div>
+                  </div>
+                  <div className="kv-row">
+                    <div className="kv-key">Email.</div>
+                    <div className="kv-val">{user.email}.</div>
+                  </div>
+
+                  <div style={{ marginTop: 8 }}>
+                    <Form
+                      onSubmit={onSaveProfile}
+                      actions={
+                        <>
+                          <Button variant="secondary" type="button" onClick={() => setProfileInfo("")}>
+                            Reset
+                          </Button>
+                          <Button variant="primary" type="submit">
+                            Sačuvaj
+                          </Button>
+                        </>
+                      }
+                    >
+                      <Form.Field label="Profile info" helper="Preporuka: do 2–3 rečenice.">
+                        <textarea
+                          className="textarea"
+                          value={profileInfo}
+                          onChange={(e) => setProfileInfo(e.target.value)}
+                          placeholder="Unesi kratak opis profila."
+                        />
+                      </Form.Field>
+                    </Form>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          )}
         </div>
       </main>
     </div>
