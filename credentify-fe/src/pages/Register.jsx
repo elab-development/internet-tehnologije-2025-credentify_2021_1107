@@ -7,7 +7,7 @@ import Button from "../components/Button";
 
 export default function Register() {
   const navigate = useNavigate();
-
+  //pamtimo stanja
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
