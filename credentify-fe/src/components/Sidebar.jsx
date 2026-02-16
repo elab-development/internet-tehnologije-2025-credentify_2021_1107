@@ -12,6 +12,7 @@ import {
   FiUsers,
   FiAward,
   FiTool,
+  FiBarChart 
 } from "react-icons/fi";
 
 function Icon({ name }) {
@@ -27,6 +28,7 @@ function Icon({ name }) {
     available_credentials: <FiGrid size={size} />,
 
     admin_users: <FiUsers size={size} />,
+    admin_metrics: <FiBarChart size={size} />,
 
     mod_skills: <FiTool size={size} />,
     mod_credentials: <FiAward size={size} />,
@@ -60,6 +62,7 @@ export default function Sidebar({ isAuthed, role, onLogout }) {
       return [
         { label: "Home", to: "/home", icon: "home" },
         { label: "Korisnici", to: "/admin-users", icon: "admin_users" },
+        { label: "Metrike", to: "/admin-metrics", icon: "admin_metrics" },
       ];
     }
 

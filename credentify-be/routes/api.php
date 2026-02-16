@@ -18,6 +18,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //admin rute za korisnike
     Route::get('/users', [UserController::class, 'index']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
+    Route::get('/admin/metrics', [UserController::class, 'adminMetrics']);
 
     //moderator rute
     Route::get('/skills', [SkillController::class, 'index']);
