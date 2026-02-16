@@ -314,9 +314,9 @@ public function adminMetrics(Request $request)
         $since = Carbon::now()->subMonths(12);
 
         $applicationsByMonth = UserCredential::query()
-            ->where('created_at', '>=', $since)
-            ->get(['created_at'])
-            ->countBy(fn ($row) => Carbon::parse($row->created_at)->format('Y-m'))
+            ->where('applied_date', '>=', $since)
+            ->get(['applied_date'])
+            ->countBy(fn ($row) => Carbon::parse($row->applied_date)->format('Y-m'))
             ->sortKeys()
             ->map(fn ($count, $month) => ['month' => (string)$month, 'count' => (int)$count])
             ->values();
