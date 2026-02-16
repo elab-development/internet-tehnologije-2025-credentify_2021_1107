@@ -618,26 +618,47 @@ button, input, select, textarea { font: inherit; }
   color: var(--c-graphite);
 }
 
-/* Modal (minimal). */
+/* Modal (scroll fix). */
 .modal-overlay {
   position: fixed;
   inset: 0;
   background: rgba(53, 53, 53, 0.45);
-  display: grid;
-  place-items: center;
-  padding: 18px;
   z-index: 999;
+
+  /* bitno: omogući scroll na overlay-u */
+  overflow-y: auto;
+
+  /* umesto grid centriranja, da bude od vrha pa na dole */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+
+  padding: 18px;
 }
 
 .modal {
   width: min(720px, 100%);
-}
 
-.modal-actions {
+  /* bitno: modal ne sme da prelazi ekran */
+  max-height: calc(100vh - 36px);
+
+  /* bitno: layout da header/footer ostanu, a content skroluje */
   display: flex;
-  gap: 10px;
-  justify-content: flex-end;
+  flex-direction: column;
+
+  /* pošto .card ima padding, a mi već imamo header/content/footer padding */
+  padding: 0;
+  overflow: hidden;
 }
 
+/* samo sadržaj skroluje */
+.modal .card-content {
+  overflow: auto;
+}
+
+/* opcionalno: malo smanji padding u modalu da bude kompaktnije */
+.modal .card-header { padding: 14px 16px 12px; }
+.modal .card-content { padding: 14px 16px; }
+.modal .card-footer { padding: 12px 16px; }
 
 
