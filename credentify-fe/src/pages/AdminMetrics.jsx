@@ -4,11 +4,40 @@ import Card from "../components/Card";
 import Button from "../components/Button";
 import { Chart } from "react-google-charts";
 
+function readCssVar(name, fallback) {
+  if (typeof window === "undefined") return fallback;
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return v || fallback;
+}
+
 export default function AdminMetrics() {
   const [m, setM] = useState(null);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
 
+  const [theme, setTheme] = useState({
+    graphite: "#353535",
+    teal: "#3c6e71",
+    white: "#ffffff",
+    dust: "#d9d9d9",
+    blue: "#284b63",
+    bg: "#ffffff",
+    text: "#353535",
+  });
+
+  useEffect(() => {
+    setTheme({
+      graphite: readCssVar("--c-graphite", "#353535"),
+      teal: readCssVar("--c-stormy-teal", "#3c6e71"),
+      white: readCssVar("--c-white", "#ffffff"),
+      dust: readCssVar("--c-dust-grey", "#d9d9d9"),
+      blue: readCssVar("--c-yale-blue", "#284b63"),
+      bg: readCssVar("--c-bg", "#ffffff"),
+      text: readCssVar("--c-text", "#353535"),
+    });
+  }, []);
+
+  // Vraćanje metrika sa backenda.
   async function fetchMetrics() {
     setErr("");
     setLoading(true);
@@ -46,6 +75,54 @@ export default function AdminMetrics() {
     return [["Mesec", "Prijave"], ...rows];
   }, [m]);
 
+  // Paleta boja za sve grafikone.
+  const palette = useMemo(
+    () => [theme.blue, theme.teal, theme.graphite, theme.dust],
+    [theme]
+  );
+
+  const commonOptions = useMemo(
+    () => ({
+      backgroundColor: "transparent",
+      chartArea: { left: 50, top: 20, right: 20, bottom: 50 },
+      legend: { textStyle: { color: theme.text } },
+      tooltip: { textStyle: { color: theme.text } },
+    }),
+    [theme]
+  );
+
+  const pieOptions = useMemo(
+    () => ({
+      ...commonOptions,
+      colors: palette,
+      pieHole: 0.35,
+      pieSliceTextStyle: { color: theme.white },
+    }),
+    [commonOptions, palette, theme]
+  );
+
+  const columnOptions = useMemo(
+    () => ({
+      ...commonOptions,
+      colors: [theme.teal],
+      legend: { position: "none" },
+      hAxis: { textStyle: { color: theme.text } },
+      vAxis: { textStyle: { color: theme.text } },
+    }),
+    [commonOptions, theme]
+  );
+
+  const lineOptions = useMemo(
+    () => ({
+      ...commonOptions,
+      colors: [theme.blue],
+      legend: { position: "none" },
+      hAxis: { textStyle: { color: theme.text } },
+      vAxis: { textStyle: { color: theme.text } },
+    }),
+    [commonOptions, theme]
+  );
+
   return (
     <Card
       title="Metrike"
@@ -62,7 +139,14 @@ export default function AdminMetrics() {
         </div>
       ) : null}
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12, marginBottom: 14 }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+          gap: 12,
+          marginBottom: 14,
+        }}
+      >
         <div className="tag">Korisnici: {m?.totals?.users ?? 0}.</div>
         <div className="tag">Kredencijali: {m?.totals?.credentials ?? 0}.</div>
         <div className="tag">Skill-ovi: {m?.totals?.skills ?? 0}.</div>
@@ -72,22 +156,22 @@ export default function AdminMetrics() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))", gap: 16 }}>
         <div>
           <div className="helper" style={{ marginBottom: 8 }}>Pie: korisnici po ulozi.</div>
-          <Chart chartType="PieChart" width="100%" height="320px" data={usersByRoleData} options={{ pieHole: 0.35 }} />
+          <Chart chartType="PieChart" width="100%" height="320px" data={usersByRoleData} options={pieOptions} />
         </div>
 
         <div>
           <div className="helper" style={{ marginBottom: 8 }}>Pie: prijave po statusu.</div>
-          <Chart chartType="PieChart" width="100%" height="320px" data={appsByStatusData} options={{ pieHole: 0.35 }} />
+          <Chart chartType="PieChart" width="100%" height="320px" data={appsByStatusData} options={pieOptions} />
         </div>
 
         <div>
           <div className="helper" style={{ marginBottom: 8 }}>Bar: top 5 kredencijala po broju prijava.</div>
-          <Chart chartType="ColumnChart" width="100%" height="320px" data={topCredentialsData} options={{ legend: { position: "none" } }} />
+          <Chart chartType="ColumnChart" width="100%" height="320px" data={topCredentialsData} options={columnOptions} />
         </div>
 
         <div>
           <div className="helper" style={{ marginBottom: 8 }}>Line: prijave po mesecima.</div>
-          <Chart chartType="LineChart" width="100%" height="320px" data={byMonthData} options={{ legend: { position: "none" } }} />
+          <Chart chartType="LineChart" width="100%" height="320px" data={byMonthData} options={lineOptions} />
         </div>
       </div>
     </Card>
