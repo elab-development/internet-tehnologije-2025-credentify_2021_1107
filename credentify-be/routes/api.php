@@ -6,6 +6,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserCredentialController;
 use App\Http\Controllers\CredentialController;
 use App\Http\Controllers\SkillController;
+use App\Http\Controllers\IssuerController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
