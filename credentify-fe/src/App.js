@@ -16,6 +16,7 @@ import AdminUsers from "./pages/AdminUsers";
 import ModSkills from "./pages/ModSkills";
 import ModCredentials from "./pages/ModCredentials";
 import ModUserCredentials from "./pages/ModUserCredentials";
+import AdminMetrics from "./pages/AdminMetrics";
 
 // Jedinstveni baseURL za sve API pozive ka backend-u (Laravel API).
 axios.defaults.baseURL = "http://127.0.0.1:8000/api";
@@ -129,6 +130,15 @@ async function handleLogout() {
               element={
                 <Guard allow={isAuthed && role === "admin"}>
                   <AdminUsers />
+                </Guard>
+              }
+            />
+
+            <Route
+              path="/admin-metrics"
+              element={
+                <Guard allow={isAuthed && role === "admin"}>
+                  <AdminMetrics />
                 </Guard>
               }
             />

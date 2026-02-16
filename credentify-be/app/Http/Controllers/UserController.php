@@ -11,6 +11,8 @@ use App\Models\Credential;
 use App\Models\UserCredential;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
+
 
 class UserController extends Controller
 {
@@ -252,5 +254,115 @@ class UserController extends Controller
             ],
         ], 201);
     }
+
+public function adminMetrics(Request $request)
+    {
+        if (!$this->requireAdmin($request)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Nemate dozvolu za ovu akciju.',
+            ], 403);
+        }
+
+        $totals = [
+            'users' => User::count(),
+            'credentials' => Credential::count(),
+            'skills' => DB::table('skills')->count(),
+            'applications' => UserCredential::count(),
+        ];
+
+        // Pie 1: korisnici po ulozi.
+        $usersByRole = User::query()
+            ->pluck('role')
+            ->countBy()
+            ->map(fn ($count, $role) => ['role' => (string)$role, 'count' => (int)$count])
+            ->values();
+
+        // Pie 2: prijave po statusu.
+        $applicationsByStatus = UserCredential::query()
+            ->pluck('status')
+            ->countBy()
+            ->map(fn ($count, $status) => ['status' => (string)$status, 'count' => (int)$count])
+            ->values();
+
+        // Bar: top kredencijali po broju prijava.
+        $credCounts = UserCredential::query()
+            ->pluck('credential_id')
+            ->countBy(); // key=credential_id, value=count
+
+        $credIds = $credCounts->keys()->map(fn ($x) => (int)$x)->values()->all();
+
+        $credNames = Credential::query()
+            ->whereIn('id', $credIds)
+            ->pluck('name', 'id'); 
+
+        $topCredentials = $credCounts
+            ->map(function ($count, $credId) use ($credNames) {
+                $id = (int)$credId;
+                return [
+                    'id' => $id,
+                    'name' => (string)($credNames->get($id) ?? 'N/A'),
+                    'count' => (int)$count,
+                ];
+            })
+            ->sortByDesc('count')
+            ->values()
+            ->take(5)
+            ->values();
+
+        // Line: prijave po mesecu (poslednjih 12 meseci).
+        $since = Carbon::now()->subMonths(12);
+
+        $applicationsByMonth = UserCredential::query()
+            ->where('created_at', '>=', $since)
+            ->get(['created_at'])
+            ->countBy(fn ($row) => Carbon::parse($row->created_at)->format('Y-m'))
+            ->sortKeys()
+            ->map(fn ($count, $month) => ['month' => (string)$month, 'count' => (int)$count])
+            ->values();
+
+        // Top skill-ovi po broju prijava (računanje preko pivot tabele, bez raw).
+        $pivot = DB::table('credential_skill')->select('credential_id', 'skill_id')->get();
+
+        $skillCounts = [];
+        foreach ($pivot as $row) {
+            $credId = (string)$row->credential_id;
+            $c = (int)($credCounts->get($credId, 0));
+            if ($c <= 0) {
+                continue;
+            }
+            $sid = (int)$row->skill_id;
+            $skillCounts[$sid] = ($skillCounts[$sid] ?? 0) + $c;
+        }
+
+        arsort($skillCounts);
+        $topSkillIds = array_slice(array_keys($skillCounts), 0, 5);
+
+        $skillNames = DB::table('skills')
+            ->whereIn('id', $topSkillIds)
+            ->pluck('name', 'id');
+
+        $topSkills = collect($topSkillIds)
+            ->map(fn ($id) => [
+                'id' => (int)$id,
+                'name' => (string)($skillNames->get((int)$id) ?? 'N/A'),
+                'count' => (int)($skillCounts[(int)$id] ?? 0),
+            ])
+            ->values();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Admin metrike.',
+            'data' => [
+                'totals' => $totals,
+                'usersByRole' => $usersByRole,
+                'applicationsByStatus' => $applicationsByStatus,
+                'topCredentials' => $topCredentials,
+                'applicationsByMonth' => $applicationsByMonth,
+                'topSkills' => $topSkills,
+            ],
+        ]);
+    }
+
 
 }
