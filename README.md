@@ -2,7 +2,7 @@
 
 Credentify je veb aplikacija koja omogućava korisnicima da na jednom mestu vode evidenciju o svojim kompetencijama, veštinama, diplomama, sertifikatima i drugim postignućima. U praksi se ovakvi podaci često nalaze u mejlovima, na papiru, u PDF fajlovima ili na društvenim mrežama, što otežava održavanje i predstavljanje trećim licima. Aplikacija rešava problem nedostatka centralizovanog, preglednog i pouzdanog načina za čuvanje i ažuriranje kredencijala, kao i nemogućnost jasnog prikaza razvoja kompetencija kroz vreme.
 
-![Logo](credentify-fe/public/credentify logo.png)
+![Logo](credentify-fe/public/credentify%20logo.png)
 
 Osnovni cilj aplikacije je da obezbedi centralno mesto na kome korisnik može da kreira profesionalni profil, doda relevantne veštine i unese kredencijale koje poseduje (sa informacijama o izdavaču i datumu izdavanja). Sistem podržava i proces provere kredencijala kroz moderatorsku ulogu, kako bi se razlikovali uneti i verifikovani podaci.
 
