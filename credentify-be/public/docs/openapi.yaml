@@ -1,0 +1,872 @@
+openapi: 3.0.3
+
+info:
+  title: Credentify REST API
+  version: "1.0.0"
+  description: |
+    OpenAPI specifikacija za Credentify aplikaciju.
+    Auth je urađen preko Laravel Sanctum tokena (Authorization: Bearer <token>).
+
+servers:
+  - url: http://127.0.0.1:8000/api
+    description: Local API
+
+tags:
+  - name: Auth
+  - name: Issuers
+  - name: Profile
+  - name: User Credentials
+  - name: Admin Users
+  - name: Moderator Skills
+  - name: Moderator Credentials
+  - name: Moderator Review
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Token
+      description: Unesi samo token iz login response-a (bez "Bearer ").
+
+  schemas:
+    BaseResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: true }
+        message: { type: string, example: "OK." }
+
+    ErrorResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: false }
+        message: { type: string, example: "Greška." }
+
+    ValidationErrorResponse:
+      type: object
+      properties:
+        success: { type: boolean, example: false }
+        message: { type: string, example: "Validacija nije prošla." }
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items: { type: string }
+      example:
+        success: false
+        message: "Validacija nije prošla."
+        errors:
+          email: ["The email field is required."]
+
+    User:
+      type: object
+      properties:
+        id: { type: integer, example: 1 }
+        name: { type: string, example: "Ana Anić" }
+        email: { type: string, format: email, example: "ana@gmail.com" }
+        role:
+          type: string
+          enum: [user, admin, moderator]
+          example: "user"
+        profile_info:
+          type: string
+          nullable: true
+          example: "Standardni korisnik Credentify aplikacije."
+      required: [id, name, email, role]
+
+    Issuer:
+      type: object
+      properties:
+        id: { type: integer, example: 1 }
+        name: { type: string, example: "Coursera" }
+        website: { type: string, nullable: true, example: "https://coursera.org" }
+        country: { type: string, nullable: true, example: "USA" }
+        email: { type: string, format: email, nullable: true, example: "info@coursera.org" }
+      required: [id, name]
+
+    Skill:
+      type: object
+      properties:
+        id: { type: integer, example: 10 }
+        name: { type: string, example: "JavaScript" }
+        category: { type: string, nullable: true, example: "Frontend" }
+      required: [id, name]
+
+    Credential:
+      type: object
+      properties:
+        id: { type: integer, example: 5 }
+        name: { type: string, example: "AWS Cloud Practitioner" }
+        category: { type: string, nullable: true, example: "Cloud" }
+        validity_months: { type: integer, nullable: true, example: 24 }
+        is_active: { type: boolean, example: true }
+        issuer:
+          $ref: "#/components/schemas/Issuer"
+        skills:
+          type: array
+          items:
+            $ref: "#/components/schemas/Skill"
+      required: [id, name, is_active]
+
+    UserCredential:
+      type: object
+      properties:
+        id: { type: integer, example: 100 }
+        status:
+          type: string
+          enum: [Pending, Approved, Rejected, Expired]
+          example: "Pending"
+        applied_date: { type: string, format: date, nullable: true, example: "2026-02-16" }
+        issued_date: { type: string, format: date, nullable: true, example: null }
+        expiry_date: { type: string, format: date, nullable: true, example: null }
+        image: { type: string, nullable: true, example: null }
+        credential:
+          $ref: "#/components/schemas/Credential"
+      required: [id, status]
+
+    ModeratorUserCredentialItem:
+      type: object
+      properties:
+        id: { type: integer, example: 100 }
+        status:
+          type: string
+          enum: [Pending, Approved, Rejected, Expired]
+          example: "Pending"
+        applied_date: { type: string, format: date, nullable: true }
+        issued_date: { type: string, format: date, nullable: true }
+        expiry_date: { type: string, format: date, nullable: true }
+        image: { type: string, nullable: true }
+        user:
+          $ref: "#/components/schemas/User"
+        credential:
+          $ref: "#/components/schemas/Credential"
+      required: [id, status, user, credential]
+
+    RegisterRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name: { type: string, example: "Ana Anić" }
+        email: { type: string, format: email, example: "ana@gmail.com" }
+        password: { type: string, example: "test123" }
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email, example: "ana@gmail.com" }
+        password: { type: string, example: "test123" }
+
+    UpdateProfileInfoRequest:
+      type: object
+      properties:
+        profile_info: { type: string, nullable: true, maxLength: 1000, example: "Kratak opis profila." }
+
+    ApplyForCredentialRequest:
+      type: object
+      required: [credential_id]
+      properties:
+        credential_id: { type: integer, example: 5 }
+
+    SkillUpsertRequest:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, example: "React" }
+        category: { type: string, nullable: true, example: "Frontend" }
+
+    CredentialUpsertRequest:
+      type: object
+      required: [name, issuer_id, skill_ids]
+      properties:
+        name: { type: string, example: "AWS Cloud Practitioner" }
+        category: { type: string, nullable: true, example: "Cloud" }
+        validity_months: { type: integer, nullable: true, minimum: 1, maximum: 120, example: 24 }
+        issuer_id: { type: integer, example: 1 }
+        is_active: { type: boolean, nullable: true, example: true }
+        skill_ids:
+          type: array
+          minItems: 1
+          maxItems: 2
+          items: { type: integer }
+          example: [10, 11]
+
+    UpdateUserCredentialStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [Pending, Approved, Rejected, Expired]
+          example: "Approved"
+        image:
+          type: string
+          nullable: true
+          maxLength: 2048
+          example: "https://example.com/cert.png"
+
+security:
+  - bearerAuth: []
+
+paths:
+  /register:
+    post:
+      tags: [Auth]
+      summary: Registracija korisnika.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RegisterRequest" }
+      responses:
+        "201":
+          description: Registracija uspešna.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          user: { $ref: "#/components/schemas/User" }
+        "422":
+          description: Validaciona greška.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ValidationErrorResponse" }
+
+  /login:
+    post:
+      tags: [Auth]
+      summary: Prijava korisnika.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginRequest" }
+      responses:
+        "200":
+          description: Prijava uspešna.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          user: { $ref: "#/components/schemas/User" }
+                          token: { type: string, example: "1|abc123..." }
+        "401":
+          description: Neispravni kredencijali.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "422":
+          description: Validaciona greška.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ValidationErrorResponse" }
+
+  /logout:
+    post:
+      tags: [Auth]
+      summary: Odjava korisnika.
+      responses:
+        "200":
+          description: Odjava uspešna.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BaseResponse" }
+        "401":
+          description: Token nedostaje ili nije validan.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /issuers:
+    get:
+      tags: [Issuers]
+      summary: Lista izdavača.
+      security: []
+      responses:
+        "200":
+          description: Lista izdavača.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          issuers:
+                            type: array
+                            items: { $ref: "#/components/schemas/Issuer" }
+
+  /me:
+    get:
+      tags: [Profile]
+      summary: Moj profil.
+      responses:
+        "200":
+          description: Profil korisnika.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          user: { $ref: "#/components/schemas/User" }
+
+  /me/profile-info:
+    put:
+      tags: [Profile]
+      summary: Ažuriranje profile_info (user only).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateProfileInfoRequest" }
+      responses:
+        "200":
+          description: Profil uspešno ažuriran.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          user: { $ref: "#/components/schemas/User" }
+        "403":
+          description: Zabranjeno (nije user).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "422":
+          description: Validaciona greška.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ValidationErrorResponse" }
+
+  /me/available-credentials:
+    get:
+      tags: [User Credentials]
+      summary: Dostupni kredencijali za prijavu (user only).
+      responses:
+        "200":
+          description: Lista dostupnih kredencijala.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          credentials:
+                            type: array
+                            items: { $ref: "#/components/schemas/Credential" }
+        "403":
+          description: Zabranjeno (nije user).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /me/apply:
+    post:
+      tags: [User Credentials]
+      summary: Prijava na kredencijal (user only).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ApplyForCredentialRequest" }
+      responses:
+        "201":
+          description: Prijava kreirana.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          user_credential: { $ref: "#/components/schemas/UserCredential" }
+        "403":
+          description: Zabranjeno (nije user).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "409":
+          description: Već postoji prijava.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "422":
+          description: Validaciona greška ili kredencijal nije dostupan.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ValidationErrorResponse" }
+
+  /me/credentials:
+    get:
+      tags: [User Credentials]
+      summary: Moji kredencijali.
+      responses:
+        "200":
+          description: Lista prijava korisnika.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          user_credentials:
+                            type: array
+                            items: { $ref: "#/components/schemas/UserCredential" }
+
+  /users:
+    get:
+      tags: [Admin Users]
+      summary: Lista korisnika (admin).
+      responses:
+        "200":
+          description: Lista korisnika.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          users:
+                            type: array
+                            items: { $ref: "#/components/schemas/User" }
+        "403":
+          description: Zabranjeno (nije admin).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /users/{id}:
+    delete:
+      tags: [Admin Users]
+      summary: Brisanje korisnika (admin).
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Korisnik obrisan.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BaseResponse" }
+        "403":
+          description: Zabranjeno (nije admin).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "404":
+          description: Korisnik nije pronađen.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /skills:
+    get:
+      tags: [Moderator Skills]
+      summary: Lista veština (auth).
+      responses:
+        "200":
+          description: Lista veština.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          skills:
+                            type: array
+                            items: { $ref: "#/components/schemas/Skill" }
+
+    post:
+      tags: [Moderator Skills]
+      summary: Kreiranje veštine (moderator).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SkillUpsertRequest" }
+      responses:
+        "201":
+          description: Veština kreirana.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          skill: { $ref: "#/components/schemas/Skill" }
+        "403":
+          description: Zabranjeno (nije moderator).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "422":
+          description: Validaciona greška.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ValidationErrorResponse" }
+
+  /skills/{id}:
+    put:
+      tags: [Moderator Skills]
+      summary: Izmena veštine (moderator).
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SkillUpsertRequest" }
+      responses:
+        "200":
+          description: Veština izmenjena.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          skill: { $ref: "#/components/schemas/Skill" }
+        "403":
+          description: Zabranjeno (nije moderator).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "404":
+          description: Veština nije pronađena.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "422":
+          description: Validaciona greška.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ValidationErrorResponse" }
+
+    delete:
+      tags: [Moderator Skills]
+      summary: Brisanje veštine (moderator).
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Veština obrisana.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BaseResponse" }
+        "403":
+          description: Zabranjeno (nije moderator).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "404":
+          description: Veština nije pronađena.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /credentials:
+    get:
+      tags: [Moderator Credentials]
+      summary: Lista kredencijala (auth).
+      responses:
+        "200":
+          description: Lista kredencijala.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          credentials:
+                            type: array
+                            items: { $ref: "#/components/schemas/Credential" }
+
+    post:
+      tags: [Moderator Credentials]
+      summary: Kreiranje kredencijala (moderator).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CredentialUpsertRequest" }
+      responses:
+        "201":
+          description: Kredencijal kreiran.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          credential: { $ref: "#/components/schemas/Credential" }
+        "403":
+          description: Zabranjeno (nije moderator).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "422":
+          description: Validaciona greška.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ValidationErrorResponse" }
+
+  /credentials/{id}:
+    get:
+      tags: [Moderator Credentials]
+      summary: Detalji kredencijala (auth).
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Detalji kredencijala.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          credential: { $ref: "#/components/schemas/Credential" }
+        "404":
+          description: Kredencijal nije pronađen.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+    put:
+      tags: [Moderator Credentials]
+      summary: Izmena kredencijala (moderator).
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CredentialUpsertRequest" }
+      responses:
+        "200":
+          description: Kredencijal izmenjen.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          credential: { $ref: "#/components/schemas/Credential" }
+        "403":
+          description: Zabranjeno (nije moderator).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "404":
+          description: Kredencijal nije pronađen.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "422":
+          description: Validaciona greška.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ValidationErrorResponse" }
+
+  /moderator/user-credentials:
+    get:
+      tags: [Moderator Review]
+      summary: Lista prijava (moderator).
+      parameters:
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [Pending, Approved, Rejected, Expired]
+        - in: query
+          name: user_id
+          required: false
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Lista prijava.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          user_credentials:
+                            type: array
+                            items: { $ref: "#/components/schemas/ModeratorUserCredentialItem" }
+        "403":
+          description: Zabranjeno (nije moderator).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /moderator/users/{id}/credentials:
+    get:
+      tags: [Moderator Review]
+      summary: Kredencijali određenog korisnika (moderator).
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Kredencijali korisnika.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          user: { $ref: "#/components/schemas/User" }
+                          user_credentials:
+                            type: array
+                            items: { $ref: "#/components/schemas/UserCredential" }
+        "403":
+          description: Zabranjeno (nije moderator).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "404":
+          description: Korisnik nije pronađen.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+
+  /moderator/user-credentials/{id}:
+    patch:
+      tags: [Moderator Review]
+      summary: Update status prijave (moderator).
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UpdateUserCredentialStatusRequest" }
+      responses:
+        "200":
+          description: Status ažuriran.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/BaseResponse"
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          user_credential: { $ref: "#/components/schemas/UserCredential" }
+        "403":
+          description: Zabranjeno (nije moderator).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "404":
+          description: Prijava nije pronađena.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "422":
+          description: Validaciona greška.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ValidationErrorResponse" }
